@@ -9,7 +9,7 @@ class Transaction(metaclass=abc.ABCMeta):
     Design Pattern: Command pattern
     """
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def execute(self):
         pass
 
@@ -60,3 +60,26 @@ class AddSalariedEmployee(AddEmployeeTransaction):
 
     def _get_schedule(self) -> PaymentSchedule:
         return PaymentSchedule()
+
+
+class AddCommissionedEmployee(AddEmployeeTransaction):
+    def __init__(
+        self, empid: int, address: str, name: str, salary: float, commission_rate: float
+    ):
+        self._salary = salary
+        self._commission_rate = commission_rate
+        super().__init__(empid, address, name)
+
+    def _get_classification(self) -> PaymentClassification:
+        return PaymentClassification(self._salary)
+
+    def _get_schedule(self) -> PaymentSchedule:
+        return PaymentSchedule()
+
+
+class DeleteEmployeeTransaction(Transaction):
+    def __init__(self, empid: int):
+        self._empid = empid
+
+    def execute(self):
+        PayrollDatabase.delete_employee(self._empid)

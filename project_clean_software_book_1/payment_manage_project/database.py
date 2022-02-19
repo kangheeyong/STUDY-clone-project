@@ -1,7 +1,10 @@
+import logging
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Optional
 
 from .payment import PaymentClassification, PaymentMethod, PaymentSchedule
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -41,8 +44,20 @@ class PayrollDatabase:
         cls._employee[empid] = e
 
     @classmethod
+    def delete_employee(cls, empid: int):
+        del cls._employee[empid]
+
+    @classmethod
     def get_employee(cls, empid: int) -> Employee:
         return cls._employee[empid]
+
+    @classmethod
+    def get_or_none_employee(cls, empid: int) -> Optional[Employee]:
+        try:
+            return cls._employee[empid]
+        except KeyError:
+            logger.info("no empid: %s", empid)
+            return None
 
     @classmethod
     def clear(cls):

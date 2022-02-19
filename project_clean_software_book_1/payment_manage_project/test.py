@@ -1,4 +1,4 @@
-from .database import PayrollDatabase
+from .database import GpayrollDatabase
 from .employee import (
     AddCommissionedEmployee,
     AddSalariedEmployee,
@@ -12,7 +12,7 @@ def test_add_salaried_employee():
     emp = AddSalariedEmployee(emp_id, "Bob", "Home", 1000.0)
     emp.execute()
 
-    e = PayrollDatabase.get_employee(emp_id)
+    e = GpayrollDatabase.get_employee(emp_id)
     assert "Bob" == e.name
 
     pc = e.get_classification()
@@ -30,7 +30,7 @@ def test_add_commissioned_employee():
     emp = AddCommissionedEmployee(emp_id, "Bob", "Home", 1000.0, 1.2)
     emp.execute()
 
-    e = PayrollDatabase.get_employee(emp_id)
+    e = GpayrollDatabase.get_employee(emp_id)
     assert "Bob" == e.name
 
     pc = e.get_classification()
@@ -48,11 +48,11 @@ def test_delete_employee():
     emp = AddSalariedEmployee(emp_id, "Bob", "Home", 1000.0)
     emp.execute()
 
-    e = PayrollDatabase.get_employee(emp_id)
+    e = GpayrollDatabase.get_employee(emp_id)
     assert e
 
     dt = DeleteEmployeeTransaction(emp_id)
     dt.execute()
 
-    e = PayrollDatabase.get_or_none_employee(emp_id)
+    e = GpayrollDatabase.get_or_none_employee(emp_id)
     assert e is None

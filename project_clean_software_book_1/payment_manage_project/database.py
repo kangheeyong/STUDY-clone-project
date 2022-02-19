@@ -37,28 +37,27 @@ class PayrollDatabase:
     pacade pattern?
     """
 
-    _employee: Dict[int, Employee] = {}
+    def __init__(self):
+        self._employee: Dict[int, Employee] = {}
 
-    @classmethod
-    def add_employee(cls, empid: int, e: Employee):
-        cls._employee[empid] = e
+    def add_employee(self, empid: int, e: Employee):
+        self._employee[empid] = e
 
-    @classmethod
-    def delete_employee(cls, empid: int):
-        del cls._employee[empid]
+    def delete_employee(self, empid: int):
+        del self._employee[empid]
 
-    @classmethod
-    def get_employee(cls, empid: int) -> Employee:
-        return cls._employee[empid]
+    def get_employee(self, empid: int) -> Employee:
+        return self._employee[empid]
 
-    @classmethod
-    def get_or_none_employee(cls, empid: int) -> Optional[Employee]:
+    def get_or_none_employee(self, empid: int) -> Optional[Employee]:
         try:
-            return cls._employee[empid]
+            return self._employee[empid]
         except KeyError:
             logger.info("no empid: %s", empid)
             return None
 
-    @classmethod
-    def clear(cls):
-        cls._employee.clear()
+    def clear(self):
+        self._employee.clear()
+
+
+GpayrollDatabase = PayrollDatabase()

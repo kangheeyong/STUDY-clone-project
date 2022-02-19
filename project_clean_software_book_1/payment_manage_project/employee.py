@@ -1,6 +1,6 @@
 import abc
 
-from .database import Employee, PayrollDatabase
+from .database import Employee, GpayrollDatabase
 from .payment import PaymentClassification, PaymentMethod, PaymentSchedule
 
 
@@ -47,7 +47,7 @@ class AddEmployeeTransaction(Transaction):
         pm = PaymentMethod()
         e.set_method(pm)
 
-        PayrollDatabase.add_employee(self._empid, e)
+        GpayrollDatabase.add_employee(self._empid, e)
 
 
 class AddSalariedEmployee(AddEmployeeTransaction):
@@ -82,4 +82,4 @@ class DeleteEmployeeTransaction(Transaction):
         self._empid = empid
 
     def execute(self):
-        PayrollDatabase.delete_employee(self._empid)
+        GpayrollDatabase.delete_employee(self._empid)

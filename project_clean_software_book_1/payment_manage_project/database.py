@@ -1,35 +1,50 @@
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
-from .payment import PaymentClassification, PaymentMethod, PaymentSchedule
+if TYPE_CHECKING:
+    from .payment import PaymentClassification, PaymentMethod, PaymentSchedule
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class Employee:
-    _id: int
+    empid: int
     address: str
     name: str
 
-    def set_classification(self, pc: PaymentClassification):
-        self._pc = pc
-
-    def get_classification(self) -> PaymentClassification:
+    @property
+    def classification(self) -> PaymentClassification:
         return self._pc
 
-    def set_schedule(self, ps: PaymentSchedule):
-        self._ps = ps
+    @classification.setter
+    def classification(self, pc: PaymentClassification):
+        self._pc = pc
 
-    def get_schedule(self) -> PaymentSchedule:
+    @property
+    def schedule(self) -> PaymentSchedule:
         return self._ps
 
-    def set_method(self, pm: PaymentMethod):
+    @schedule.setter
+    def schedule(self, ps: PaymentSchedule):
+        self._ps = ps
+
+    @property
+    def method(self) -> PaymentMethod:
+        return self._pm
+
+    @method.setter
+    def method(self, pm: PaymentMethod):
         self._pm = pm
 
-    def get_method(self) -> PaymentMethod:
-        return self._pm
+
+@dataclass
+class TimeCard:
+    date: int
+    hourly: float
 
 
 class PayrollDatabase:

@@ -1,3 +1,5 @@
+import pytest
+
 from .database import GpayrollDatabase
 from .employee import (
     AddCommissionedEmployee,
@@ -80,5 +82,12 @@ def test_time_card_transaction():
     assert isinstance(hc, HourlyClassification)
 
     tc = hc.get_time_card(20011031)
-    assert tc
     assert tc.hourly == 8.0
+
+
+def test_raise_time_card_transaction():
+    emp_id = -1
+
+    tct = TimeCardTransaction(20011031, 8.0, emp_id)
+    with pytest.raises(Exception):
+        tct.execute()

@@ -111,13 +111,13 @@ class TimeCardTransaction(Transaction):
         self._empid = empid
 
     def execute(self):
-        e = GpayrollDatabase.get_employee(self._empid)
-
-        if e:
-            hc = e.classification
-            if isinstance(hc, HourlyClassification):
-                hc.add_time_card(TimeCard(date=self._date, hourly=self._hourly))
-            else:
-                raise Exception("Tried to add timecard to non-hourly employee")
-        else:
+        try:
+            e = GpayrollDatabase.get_employee(self._empid)
+        except KeyError:
             raise Exception("No such employee.")
+
+        hc = e.classification
+        if isinstance(hc, HourlyClassification):
+            hc.add_time_card(TimeCard(date=self._date, hourly=self._hourly))
+        else:
+            raise Exception("Tried to add timecard to non-hourly employee")

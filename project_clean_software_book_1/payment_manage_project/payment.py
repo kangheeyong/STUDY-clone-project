@@ -1,7 +1,7 @@
 import abc
 from typing import Dict
 
-from .database import TimeCard
+from .database import SalesReceipt, TimeCard
 
 
 class PaymentClassification(metaclass=abc.ABCMeta):
@@ -30,11 +30,18 @@ class HourlyClassification(PaymentClassification):
 
 class CommissionedClassification(PaymentClassification):
     def __init__(self, salary: float):
+        self._sales_receipt: Dict[int, SalesReceipt] = {}
         self._salary = salary
 
     @property
     def salary(self) -> float:
         return self._salary
+
+    def add_sales_receipt(self, sr: SalesReceipt):
+        self._sales_receipt[sr.date] = sr
+
+    def get_sales_receipt(self, date: int) -> SalesReceipt:
+        return self._sales_receipt[date]
 
 
 class PaymentSchedule:

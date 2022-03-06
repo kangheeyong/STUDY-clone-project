@@ -47,6 +47,12 @@ class TimeCard:
     hourly: float
 
 
+@dataclass
+class SalesReceipt:
+    date: int
+    amount: float
+
+
 class PayrollDatabase:
     """
     pacade pattern?

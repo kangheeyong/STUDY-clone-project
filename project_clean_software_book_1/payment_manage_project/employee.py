@@ -1,6 +1,6 @@
 import abc
 
-from .database import Employee, GpayrollDatabase, TimeCard
+from .database import Employee, GpayrollDatabase, SalesReceipt, TimeCard
 from .payment import (
     CommissionedClassification,
     HourlyClassification,
@@ -121,3 +121,22 @@ class TimeCardTransaction(Transaction):
             hc.add_time_card(TimeCard(date=self._date, hourly=self._hourly))
         else:
             raise Exception("Tried to add timecard to non-hourly employee")
+
+
+class SalesReceiptTransaction(Transaction):
+    def __init__(self, date: int, amount: float, empid: int):
+        self._date = date
+        self._amount = amount
+        self._empid = empid
+
+    def execute(self):
+        try:
+            e = GpayrollDatabase.get_employee(self._empid)
+        except KeyError:
+            raise Exception("No such employee.")
+
+        cc = e.classification
+        if isinstance(cc, CommissionedClassification):
+            cc.add_sales_receipt(SalesReceipt(date=self._date, amount=self._amount))
+        else:
+            raise Exception("Tried to add timecard to non-amount employee")

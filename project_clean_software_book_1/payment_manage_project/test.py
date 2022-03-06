@@ -9,6 +9,7 @@ from .employee import (
     DeleteEmployeeTransaction,
     HourlyClassification,
     SalariedClassification,
+    SalesReceiptTransaction,
     TimeCardTransaction,
 )
 
@@ -66,7 +67,6 @@ def test_delete_employee():
 
 
 def test_time_card_transaction():
-
     emp_id = 4
 
     emp = AddHourlyEmployee(emp_id, "bill", "Home", 15.25)
@@ -91,3 +91,22 @@ def test_raise_time_card_transaction():
     tct = TimeCardTransaction(20011031, 8.0, emp_id)
     with pytest.raises(Exception):
         tct.execute()
+
+
+def test_sales_receipt_transaction():
+    emp_id = 5
+
+    emp = AddCommissionedEmployee(emp_id, "Bob", "Home", 1000.0, 1.2)
+    emp.execute()
+
+    srt = SalesReceiptTransaction(20011031, 8.0, emp_id)
+    srt.execute()
+
+    e = GpayrollDatabase.get_or_none_employee(emp_id)
+    assert e is not None
+
+    cc = e.classification
+    assert isinstance(cc, CommissionedClassification)
+
+    srt = cc.get_sales_receipt(20011031)
+    assert srt.amount == 8.0

@@ -5,14 +5,19 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Dict, Optional
 
 if TYPE_CHECKING:
-    from .payment import PaymentClassification, PaymentMethod, PaymentSchedule
+    from .payment import (
+        Affiliation,
+        PaymentClassification,
+        PaymentMethod,
+        PaymentSchedule,
+    )
 
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class Employee:
-    empid: int
+    emp_id: int
     address: str
     name: str
 
@@ -40,6 +45,14 @@ class Employee:
     def method(self, pm: PaymentMethod):
         self._pm = pm
 
+    @property
+    def affiliation(self) -> Affiliation:
+        return self._af
+
+    @affiliation.setter
+    def affiliation(self, af: Affiliation):
+        self._af = af
+
 
 @dataclass
 class TimeCard:
@@ -53,6 +66,12 @@ class SalesReceipt:
     amount: float
 
 
+@dataclass
+class ServiceCharge:
+    date: int
+    amount: float
+
+
 class PayrollDatabase:
     """
     pacade pattern?
@@ -60,21 +79,28 @@ class PayrollDatabase:
 
     def __init__(self):
         self._employee: Dict[int, Employee] = {}
+        self._member: Dict[int, Employee] = {}
 
-    def add_employee(self, empid: int, e: Employee):
-        self._employee[empid] = e
+    def add_employee(self, emp_id: int, e: Employee):
+        self._employee[emp_id] = e
 
-    def delete_employee(self, empid: int):
-        del self._employee[empid]
+    def add_union_member(self, member_id: int, e: Employee):
+        self._member[member_id] = e
 
-    def get_employee(self, empid: int) -> Employee:
-        return self._employee[empid]
+    def delete_employee(self, emp_id: int):
+        del self._employee[emp_id]
 
-    def get_or_none_employee(self, empid: int) -> Optional[Employee]:
+    def get_employee(self, emp_id: int) -> Employee:
+        return self._employee[emp_id]
+
+    def get_union_member(self, member_id: int) -> Employee:
+        return self._member[member_id]
+
+    def get_or_none_employee(self, emp_id: int) -> Optional[Employee]:
         try:
-            return self._employee[empid]
+            return self._employee[emp_id]
         except KeyError:
-            logger.info("no empid: %s", empid)
+            logger.info("no emp_id: %s", emp_id)
             return None
 
     def clear(self):

@@ -1,10 +1,14 @@
 import abc
 from typing import Dict
 
-from .database import SalesReceipt, TimeCard
+from .database import SalesReceipt, ServiceCharge, TimeCard
 
 
 class PaymentClassification(metaclass=abc.ABCMeta):
+    pass
+
+
+class Affiliation(metaclass=abc.ABCMeta):
     pass
 
 
@@ -42,6 +46,22 @@ class CommissionedClassification(PaymentClassification):
 
     def get_sales_receipt(self, date: int) -> SalesReceipt:
         return self._sales_receipt[date]
+
+
+class UnionAffiliation(Affiliation):
+    def __init__(self, value: float):
+        self._value = value
+        self._service_charge: Dict[int, ServiceCharge] = {}
+
+    @property
+    def value(self) -> float:
+        return self._value
+
+    def add_service_charge(self, sc: ServiceCharge):
+        self._service_charge[sc.date] = sc
+
+    def get_service_charge(self, date: int) -> ServiceCharge:
+        return self._service_charge[date]
 
 
 class PaymentSchedule:

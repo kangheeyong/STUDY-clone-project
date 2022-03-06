@@ -1,6 +1,6 @@
 import abc
 
-from .database import Employee, GpayrollDatabase, SalesReceipt, TimeCard
+from .database import Employee, GpayrollDatabase, SalesReceipt, ServiceCharge, TimeCard
 from .payment import (
     CommissionedClassification,
     HourlyClassification,
@@ -8,6 +8,7 @@ from .payment import (
     PaymentMethod,
     PaymentSchedule,
     SalariedClassification,
+    UnionAffiliation,
 )
 
 
@@ -24,11 +25,11 @@ class Transaction(metaclass=abc.ABCMeta):
 class AddEmployeeTransaction(Transaction):
     def __init__(
         self,
-        empid: int,
+        emp_id: int,
         name: str,
         address: str,
     ):
-        self._empid = empid
+        self._emp_id = emp_id
         self._name = name
         self._address = address
 
@@ -40,7 +41,7 @@ class AddEmployeeTransaction(Transaction):
 
     def execute(self):
         e = Employee(
-            empid=self._empid,
+            emp_id=self._emp_id,
             name=self._name,
             address=self._address,
         )
@@ -54,13 +55,13 @@ class AddEmployeeTransaction(Transaction):
         pm = PaymentMethod()
         e.method = pm
 
-        GpayrollDatabase.add_employee(self._empid, e)
+        GpayrollDatabase.add_employee(self._emp_id, e)
 
 
 class AddSalariedEmployee(AddEmployeeTransaction):
-    def __init__(self, empid: int, address: str, name: str, salary: float):
+    def __init__(self, emp_id: int, address: str, name: str, salary: float):
         self._salary = salary
-        super().__init__(empid, address, name)
+        super().__init__(emp_id, address, name)
 
     def _get_classification(self) -> SalariedClassification:
         return SalariedClassification(self._salary)
@@ -71,11 +72,16 @@ class AddSalariedEmployee(AddEmployeeTransaction):
 
 class AddCommissionedEmployee(AddEmployeeTransaction):
     def __init__(
-        self, empid: int, address: str, name: str, salary: float, commission_rate: float
+        self,
+        emp_id: int,
+        address: str,
+        name: str,
+        salary: float,
+        commission_rate: float,
     ):
         self._salary = salary
         self._commission_rate = commission_rate
-        super().__init__(empid, address, name)
+        super().__init__(emp_id, address, name)
 
     def _get_classification(self) -> CommissionedClassification:
         return CommissionedClassification(self._salary)
@@ -85,9 +91,9 @@ class AddCommissionedEmployee(AddEmployeeTransaction):
 
 
 class AddHourlyEmployee(AddEmployeeTransaction):
-    def __init__(self, empid: int, address: str, name: str, hourly_rate: float):
+    def __init__(self, emp_id: int, address: str, name: str, hourly_rate: float):
         self._hourly_rate = hourly_rate
-        super().__init__(empid, address, name)
+        super().__init__(emp_id, address, name)
 
     def _get_classification(self) -> HourlyClassification:
         return HourlyClassification()
@@ -97,22 +103,22 @@ class AddHourlyEmployee(AddEmployeeTransaction):
 
 
 class DeleteEmployeeTransaction(Transaction):
-    def __init__(self, empid: int):
-        self._empid = empid
+    def __init__(self, emp_id: int):
+        self._emp_id = emp_id
 
     def execute(self):
-        GpayrollDatabase.delete_employee(self._empid)
+        GpayrollDatabase.delete_employee(self._emp_id)
 
 
 class TimeCardTransaction(Transaction):
-    def __init__(self, date: int, hourly: float, empid: int):
+    def __init__(self, date: int, hourly: float, emp_id: int):
         self._date = date
         self._hourly = hourly
-        self._empid = empid
+        self._emp_id = emp_id
 
     def execute(self):
         try:
-            e = GpayrollDatabase.get_employee(self._empid)
+            e = GpayrollDatabase.get_employee(self._emp_id)
         except KeyError:
             raise Exception("No such employee.")
 
@@ -124,14 +130,14 @@ class TimeCardTransaction(Transaction):
 
 
 class SalesReceiptTransaction(Transaction):
-    def __init__(self, date: int, amount: float, empid: int):
+    def __init__(self, date: int, amount: float, emp_id: int):
         self._date = date
         self._amount = amount
-        self._empid = empid
+        self._emp_id = emp_id
 
     def execute(self):
         try:
-            e = GpayrollDatabase.get_employee(self._empid)
+            e = GpayrollDatabase.get_employee(self._emp_id)
         except KeyError:
             raise Exception("No such employee.")
 
@@ -139,4 +145,23 @@ class SalesReceiptTransaction(Transaction):
         if isinstance(cc, CommissionedClassification):
             cc.add_sales_receipt(SalesReceipt(date=self._date, amount=self._amount))
         else:
-            raise Exception("Tried to add timecard to non-amount employee")
+            raise Exception("Tried to add sales receipt to non-amount employee")
+
+
+class ServiceChargeTransaction(Transaction):
+    def __init__(self, member_id: int, date: int, amount: float):
+        self._member_id = member_id
+        self._date = date
+        self._amount = amount
+
+    def execute(self):
+        try:
+            e = GpayrollDatabase.get_union_member(self._member_id)
+        except KeyError:
+            raise Exception("No such union_member.")
+
+        uaf = e.affiliation
+        if isinstance(uaf, UnionAffiliation):
+            uaf.add_service_charge(ServiceCharge(date=self._date, amount=self._amount))
+        else:
+            raise Exception("Tried to add service charge to non-amount employee")
